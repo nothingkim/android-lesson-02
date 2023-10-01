@@ -2,11 +2,23 @@
     <body>
         <a href="/download"> <--  다운로드 페이지로 </a>
         <h2> 파일 업로드 </h2>
-        <span>파일 업로드 코드를 작성하십시오.</span>
-        <span>파일을 업로드하는 예제에 대해서는 <a href="https://github.com/java-lesson-cbnu/android-lesson-01">이전 예제 레포지토리</a>를 참고하세요. </span>
+        <form  method="post"action="api/v1/rest/aws/upload" enctype="multipart/form-data">
+            <input name = "file" type="file" value="파일 선택"/><br/>
+            <input type="submit" value="업로드"/><br/>
+        </form>
         <span id="message"> </span>
     </body>
     <script>
+                            (async () => {
+            const response = await fetch('/api/v1/rest/aws/list');
+            const result = await response.json();
+            console.log(result);
+            for (let i = 0; i < result.length; i++) {
+                let li = document.createElement("li");
+                li.appendChild(document.createTextNode(result[i]));
+                document.getElementById("fileList").appendChild(li);
+            }
+        })()
 
         let params = new URLSearchParams(window.location.search);
         if (params.get("success") != null) {
