@@ -1,8 +1,13 @@
 package kr.easw.lesson02.controller;
 
+import com.amazonaws.auth.policy.Resource;
 import kr.easw.lesson02.model.dto.AWSKeyDto;
 import kr.easw.lesson02.service.AWSService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
@@ -42,15 +47,21 @@ public class AWSConroller {
         }
     }
 
-
-    @PostMapping("/download")
-    private ModelAndView onDownload(@RequestParam String fileName) {
+    @GetMapping("/download")
+    private ResponseEntity<ByteArrayResource> onDownload(@RequestParam String fileName) {
         try {
-           // 이곳에 파일 다운로드 로직, 혹은 서비스를 통한 다운로드 호출을 구현하십시오.
-           throw new IllegalStateException("기능이 구현되지 않았습니다.");
-        } catch (Throwable e) {
-            return new ModelAndView("redirect:/server-error?errorStatus=" + e.getMessage());
-        }
-    }
+            ByteArrayResource resource = awsController.download(fileName);
 
-}
+            if (resource != null) {
+                return ResponseEntity.ok()
+                        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
+                        .body(resource);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(null);
+        }
+    }}
