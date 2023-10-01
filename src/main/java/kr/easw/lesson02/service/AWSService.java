@@ -5,22 +5,35 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
-import com.amazonaws.services.s3.model.Bucket;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.S3ObjectSummary;
+import com.amazonaws.services.s3.model.*;
 import kr.easw.lesson02.model.dto.AWSKeyDto;
 import lombok.SneakyThrows;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StreamUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
 import java.util.List;
 import java.util.UUID;
-
 @Service
 public class AWSService {
     private static final String BUCKET_NAME = "easw-random-bucket-" + UUID.randomUUID();
-    private AmazonS3 s3Client = null;
+    private static AmazonS3 s3Client = null;
+
+    public ByteArrayResource download(String fileName) {
+        try {
+           GetObjectRequest getObjectRequest = new GetObjectRequest(BUCKET_NAME, fileName);
+            S3Object s3Object = s3Client.getObject(getObjectRequest);
+            byte[] objectBytes = StreamUtils.copyToByteArray(s3Object.getObjectContent());
+            ByteArrayResource byteArrayResource = new ByteArrayResource(objectBytes);
+            return byteArrayResource;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
 
     public void initAWSAPI(AWSKeyDto awsKey) {
         s3Client = AmazonS3ClientBuilder.standard()
